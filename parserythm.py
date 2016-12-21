@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import csv
+import sys
+
+csv.field_size_limit(sys.maxsize)
+
+def get_eegs(filename):
+    eegs = np.zeros((581, 75000))
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+        c = 0
+        reader.next()
+        for row in reader:
+            eegs[c, :] = row[2:75002]
+            c += 1
+    return eegs
+
+def hypnogram_to_list(v):
+    out = []
+    cpt = 0
+    for c in v:
+        if c == '0':
+            out.append(0)
+        elif c == '1':
+            if v[cpt-1] == '-':
+                out.append(-1)
+            else:
+                out.append(1)
+        elif c == '2':
+            out.append(2)
+        elif c == '3':
+            out.append(3)
+        elif c == '4':
+            out.append(4)
+        cpt += 1
+    return out
+
+
+def get_hypnograms(filename):
+    hypnograms = []
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+        reader.next()
+        for row in reader:
+            hypnograms.append(np.array(hypnogram_to_list(row[75002])))
+    return hypnograms
+
+def get_labels(filename):
+    labels = np.zeros(581)
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        reader.next()
+        c = 0
+        for row in reader:
+            labels[c] = row[1]
+            c += 1
+    return labels
+
+if __name__ == "__main__":
+    print(hypnogram_to_list("['1', '2', '-1', '-1', '4']"))
+    #eegs = get_eegs('train_input.csv')
+    hypnograms = get_hypnograms('train_input.csv')
+    labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
+    #plt.plot(eegs[0, :])
+    #plt.figure()
+    plt.plot(hypnograms[0])
+    plt.figure()
+    plt.plot(labels)
+    plt.show()
+
