@@ -59,12 +59,14 @@ def get_labels(filename):
 
 if __name__ == "__main__":
     print(hypnogram_to_list("['1', '2', '-1', '-1', '4']"))
-    #eegs = get_eegs('train_input.csv')
+    eegs = get_eegs('train_input.csv')
     hypnograms = get_hypnograms('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
-    #plt.plot(eegs[0, :])
-    #plt.figure()
-    plt.plot(hypnograms[0])
+    plt.plot(eegs[1, :])
+    plt.plot(eegs[2, :])
+    plt.plot(eegs[3, :])
+    plt.figure()
+    plt.plot(hypnograms[1])
     plt.figure()
     plt.plot(labels)
     plt.show()
