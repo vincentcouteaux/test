@@ -1,6 +1,9 @@
 import numpy as np
 from parserythm import *
+import sklearn as sk
+import sklearn.linear_model
 import pywt
+from mape import *
 
 def get_deep_sleep_proportion(hypnograms):
     out = []
@@ -59,6 +62,14 @@ def wavelet(eeg):
     plt.imshow(coefs, aspect="auto")
     plt.show()
 
+def get_features(hypnograms):
+    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms))).T
+
+def train_and_give_forecast(X, ages):
+    regr = sk.linear_model.LinearRegression()
+    regr.fit(X, ages)
+    return regr.predict(X)
+
 if __name__ == "__main__":
     hypnograms = get_hypnograms('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
@@ -68,15 +79,16 @@ if __name__ == "__main__":
     awake = get_awake_proportion(hypnograms)
     rem = get_rem_time(hypnograms)
     wakenings = number_of_wakening(hypnograms)
-    plt.scatter(labels, deepsleep)
-    plt.title('deep sleep proportion')
-    plt.figure()
-    plt.scatter(labels, wakenings)
-    plt.title('wakenings time')
-    plt.figure()
-    plt.scatter(labels, wake_after_sleep_onset(hypnograms))
-    plt.title('waso (min)')
-    plt.figure()
-    plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
-    plt.title('deep sleep quality')
-    plt.show()
+    #plt.scatter(labels, deepsleep)
+    #plt.title('deep sleep proportion')
+    #plt.figure()
+    #plt.scatter(labels, wakenings)
+    #plt.title('wakenings time')
+    #plt.figure()
+    #plt.scatter(labels, wake_after_sleep_onset(hypnograms))
+    #plt.title('waso (min)')
+    #plt.figure()
+    #plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
+    #plt.title('deep sleep quality')
+    #plt.show()
+    print(mape(train_and_give_forecast(get_features(hypnograms), labels), labels))
