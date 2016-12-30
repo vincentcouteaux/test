@@ -20,6 +20,40 @@ def get_rem_time(hypnograms):
         out.append(np.sum(hypnogram == 4))
     return np.array(out)
 
+def number_of_wakening(hypnograms):
+    out = []
+    for hypnogram in hypnograms:
+        out.append(0)
+        for i in range(hypnogram.size - 1):
+            if hypnogram[i] != 0 and hypnogram[i+1] == 0:
+                out[-1] += 1
+    return np.array(out)
+
+def get_waso(hypnogram):
+    asleep = np.argmax(hypnogram > 0)
+    return sum(hypnogram[asleep:] == 0)
+
+def wake_after_sleep_onset(hypnograms):
+    out=[]
+    for hypnogram in hypnograms:
+        out.append(get_waso(hypnogram))
+    return np.array(out)
+
+def total_sleep_time(hypnograms):
+    out=[]
+    for hypnogram in hypnograms:
+        out.append(len(hypnogram))
+    return np.array(out)
+
+def number_of_deep_sleep(hypnograms):
+    out = []
+    for hypnogram in hypnograms:
+        out.append(0)
+        for i in range(hypnogram.size - 1):
+            if hypnogram[i] != 3 and hypnogram[i+1] == 3:
+                out[-1] += 1
+    return np.array(out)
+
 def wavelet(eeg):
     coefs, _ = pywt.cwt(eeg, np.arange(1, 129), 'gaus1')
     plt.imshow(coefs, aspect="auto")
@@ -33,9 +67,16 @@ if __name__ == "__main__":
     deepsleep = get_deep_sleep_proportion(hypnograms)
     awake = get_awake_proportion(hypnograms)
     rem = get_rem_time(hypnograms)
-    plt.scatter(deepsleep, labels)
+    wakenings = number_of_wakening(hypnograms)
+    plt.scatter(labels, deepsleep)
     plt.title('deep sleep proportion')
     plt.figure()
-    plt.scatter(rem, labels)
-    plt.title('rem time')
+    plt.scatter(labels, wakenings)
+    plt.title('wakenings time')
+    plt.figure()
+    plt.scatter(labels, wake_after_sleep_onset(hypnograms))
+    plt.title('waso (min)')
+    plt.figure()
+    plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
+    plt.title('deep sleep quality')
     plt.show()
