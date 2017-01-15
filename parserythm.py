@@ -53,21 +53,31 @@ def get_labels(filename):
         reader.next()
         c = 0
         for row in reader:
-            labels[c] = row[1]
+            labels[c] = int(row[1])
             c += 1
     return labels
+
+def get_device(filename):
+    devices = []
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        reader.next()
+        for row in reader:
+            devices.append(row[1])
+    return np.array(devices)
 
 if __name__ == "__main__":
     print(hypnogram_to_list("['1', '2', '-1', '-1', '4']"))
     eegs = get_eegs('train_input.csv')
     hypnograms = get_hypnograms('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
+    devices = get_device('train_input.csv')
     plt.plot(eegs[1, :])
     plt.plot(eegs[2, :])
     plt.plot(eegs[3, :])
     plt.figure()
     plt.plot(hypnograms[1])
     plt.figure()
-    plt.plot(labels)
+    plt.scatter(labels, devices)
     plt.show()
 

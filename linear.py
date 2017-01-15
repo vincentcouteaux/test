@@ -2,6 +2,7 @@ import numpy as np
 from parserythm import *
 import sklearn as sk
 import sklearn.linear_model
+import sklearn.ensemble
 import pywt
 from mape import *
 
@@ -62,17 +63,28 @@ def wavelet(eeg):
     plt.imshow(coefs, aspect="auto")
     plt.show()
 
-def get_features(hypnograms):
-    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms))).T
+def get_features(hypnograms, devices):
+    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms), devices)).T
 
 def train_and_give_forecast(X, ages):
-    regr = sk.linear_model.LinearRegression()
+    #regr = sk.linear_model.LinearRegression()
+    regr = sk.ensemble.RandomForestRegressor()
     regr.fit(X, ages)
     return regr.predict(X)
+
+def train(X, ages):
+    #regr = sk.linear_model.LinearRegression()
+    regr = sk.ensemble.RandomForestRegressor()
+    regr.fit(X, ages)
+    return regr
+
+def predict_test(Y, regr):
+    return regr.predict(Y)
 
 if __name__ == "__main__":
     hypnograms = get_hypnograms('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
+    devices = get_device('train_input.csv')
     #eegs = get_eegs('train_input.csv')
     #wavelet(eegs[0])
     deepsleep = get_deep_sleep_proportion(hypnograms)
@@ -91,4 +103,9 @@ if __name__ == "__main__":
     #plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
     #plt.title('deep sleep quality')
     #plt.show()
-    print(mape(train_and_give_forecast(get_features(hypnograms), labels), labels))
+    #print(mape(train_and_give_forecast(get_features(hypnograms), labels), labels))
+    regr = train(get_features(hypnograms, devices), labels)
+    hyp_test = get_hypnograms('test_input.csv')
+    dev_test = get_device('test_input.csv')
+    forecast = predict_test(get_features(hyp_test, dev_test), regr)
+    test_to_csv(forecast, 'ans2')
