@@ -47,6 +47,11 @@ def spectrums(eegs, f_max, n=-1):
     print('maxbin', max_bin)
     return s[:, :max_bin]
 
+def maxf (eegs):
+    spec = spectrums(eegs, 10.)
+    return np.max(spec, 1)
+
+
 def all_ages_stft(eegs, ages):
     for age in range(int(np.min(ages)), int(np.max(ages)+1)):
         if age in ages:
@@ -59,13 +64,17 @@ def all_ages_stft(eegs, ages):
 if __name__ == "__main__":
     eegs = get_eegs('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
+    devices = get_device('train_input.csv')
 #    stft(eegs[0], labels[0])
     #stft(eegs[1], labels[1])
 #    stft(eegs[2], labels[2])
 #    stft(eegs[np.argmax(labels)], np.max(labels))
 #    stft(eegs[np.argmin(labels)], np.min(labels))
     #plt.hist(labels, 40)
-    all_ages_stft(eegs, labels)
+    #all_ages_stft(eegs, labels)
     #wavelet(eegs[2], labels[2])
-    #plt.scatter(labels, f_0s(eegs))
+    plt.scatter(labels[devices==0], maxf(eegs[devices==0]))
+    plt.figure()
+    plt.scatter(labels[devices==1], maxf(eegs[devices==1]))
     plt.show()
+

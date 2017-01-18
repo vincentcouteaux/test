@@ -59,7 +59,8 @@ def train_eval_base():
             eegs[c, :] = row[2:75002]
             c += 1
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
-    return hypnograms[:500], eegs[:500], labels[:500], hypnograms[500:], eegs[500:], labels[500:]
+    devices = get_device('train_input.csv')
+    return hypnograms[:500], eegs[:500], devices[:500], labels[:500], hypnograms[500:], eegs[500:], devices[500:], labels[500:]
 
 def get_labels(filename):
     labels = np.zeros(581)
@@ -78,7 +79,7 @@ def get_device(filename):
         reader = csv.reader(csvfile, delimiter=";")
         reader.next()
         for row in reader:
-            devices.append(row[1])
+            devices.append(int(float(row[1])))
     return np.array(devices)
 
 if __name__ == "__main__":
