@@ -39,6 +39,14 @@ def f_0s(eegs):
         out.append(f_0(eeg))
     return out
 
+def spectrums(eegs, f_max, n=-1):
+    if n == -1:
+        n = eegs.shape[1]/2
+    s = np.abs(np.fft.fft(eegs, n=n))
+    max_bin = int(float(f_max)/FE*n)
+    print('maxbin', max_bin)
+    return s[:, :max_bin]
+
 def all_ages_stft(eegs, ages):
     for age in range(int(np.min(ages)), int(np.max(ages)+1)):
         if age in ages:

@@ -63,8 +63,8 @@ def wavelet(eeg):
     plt.imshow(coefs, aspect="auto")
     plt.show()
 
-def get_features(hypnograms, devices):
-    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms), devices)).T
+def get_features(hypnograms):
+    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms))).T
 
 def train_and_give_forecast(X, ages):
     #regr = sk.linear_model.LinearRegression()
@@ -104,8 +104,8 @@ if __name__ == "__main__":
     #plt.title('deep sleep quality')
     #plt.show()
     #print(mape(train_and_give_forecast(get_features(hypnograms), labels), labels))
-    regr = train(get_features(hypnograms, devices), labels)
+    regr = train(get_features(hypnograms), labels)
     hyp_test = get_hypnograms('test_input.csv')
     dev_test = get_device('test_input.csv')
-    forecast = predict_test(get_features(hyp_test, dev_test), regr)
+    forecast = predict_test(get_features(hyp_test), regr)
     test_to_csv(forecast, 'ans2')
