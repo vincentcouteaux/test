@@ -94,6 +94,6 @@ if __name__ == "__main__":
     plt.figure()
     plt.plot(hypnograms[1])
     plt.figure()
-    plt.scatter(labels, devices)
+    plt.plot(labels)
     plt.show()
 

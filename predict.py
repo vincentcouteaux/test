@@ -9,23 +9,20 @@ import sklearn.ensemble
 
 train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
 
-train_features = get_features(train_hyp)
-train_features = np.c_[(train_features, train_devices, maxf(train_eegs))]
-#train_spec = spectrums(train_eegs, 30., 256)
-#print(train_features.shape, train_spec.shape)
-#train_features = np.c_[(train_features, train_spec)]
+def extract_features(hyp, devices, eegs):
+    features = get_features(hyp)
+    return np.c_[(features, devices, maxf(eegs), spectrums(eegs, 30., 10., 512))]
+    #return np.c_[(features, devices, maxf(eegs), spectrums(eegs, 30., 10., 512)/(maxf(eegs)[:, None]))]
 
-#eval_spec = spectrums(eval_eegs, 30., 256)
-eval_features = get_features(eval_hyp)
-eval_features = np.c_[(eval_features, eval_devices, maxf(eval_eegs))] #eval_spec)]
-#eval_features = eval_spec
+train_features = extract_features(train_hyp, train_devices, train_eegs)
+eval_features = extract_features(eval_hyp, eval_devices, eval_eegs)
 
 regr = sk.ensemble.RandomForestRegressor()
 #regr = sk.linear_model.LinearRegression()
 regr.fit(train_features, train_labels)
 print("score: {}".format(mape(regr.predict(eval_features), eval_labels)))
 
-regr = sk.ensemble.RandomForestRegressor(n_estimators=30)
-regr.fit(train_features, train_labels)
-print("score: {}".format(mape(regr.predict(eval_features), eval_labels)))
+#regr = sk.ensemble.RandomForestRegressor(n_estimators=30)
+#regr.fit(train_features, train_labels)
+#print("score: {}".format(mape(regr.predict(eval_features), eval_labels)))
 

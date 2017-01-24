@@ -39,17 +39,32 @@ def f_0s(eegs):
         out.append(f_0(eeg))
     return out
 
-def spectrums(eegs, f_max, n=-1):
+def spectrums(eegs, f_max, f_min = -1, n=-1):
     if n == -1:
         n = eegs.shape[1]/2
+    if f_min == -1:
+        min_bin = 0
+    else:
+        min_bin = int(float(f_min)/FE*n)
     s = np.abs(np.fft.fft(eegs, n=n))
     max_bin = int(float(f_max)/FE*n)
-    print('maxbin', max_bin)
-    return s[:, :max_bin]
+    return s[:, min_bin:max_bin]
 
 def maxf (eegs):
     spec = spectrums(eegs, 10.)
+    #print(np.argmax(spec, 1))
     return np.max(spec, 1)
+
+def max_alpha(eegs):
+    spec=spectrums(eegs, 30., 10., 1024)
+    #print(np.argmax(spec, 1)*float(FE)/eegs.shape[1])
+    for k in range(10):
+        plt.plot(spec[k])
+        plt.show()
+    return np.max(spec, 1)
+
+def above75(eegs):
+    return np.sum(np.abs(eegs) > 75., 1)
 
 
 def all_ages_stft(eegs, ages):
@@ -73,8 +88,8 @@ if __name__ == "__main__":
     #plt.hist(labels, 40)
     #all_ages_stft(eegs, labels)
     #wavelet(eegs[2], labels[2])
-    plt.scatter(labels[devices==0], maxf(eegs[devices==0]))
+    plt.scatter(labels[devices==0], above75(eegs[devices==0]))
     plt.figure()
-    plt.scatter(labels[devices==1], maxf(eegs[devices==1]))
+    plt.scatter(labels[devices==1], above75(eegs[devices==1]))
     plt.show()
 
