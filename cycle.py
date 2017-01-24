@@ -7,6 +7,13 @@ def max_gliss(hyp, size_filter):
 		out[k] = np.max(hyp[k-size_filter:k+size_filter])
 	return out
 
+def list_max_gliss(hyps, size_filter):
+	out = []
+	for hyp in hyps:
+		out.append(max_gliss(hyp, size_filter)) 
+	return out
+
+
 if __name__ == "__main__":
     hypnograms = get_hypnograms('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
