@@ -62,6 +62,21 @@ def train_eval_base():
     devices = get_device('train_input.csv')
     return hypnograms[:500], eegs[:500], devices[:500], labels[:500], hypnograms[500:], eegs[500:], devices[500:], labels[500:]
 
+def test_base():
+    hypnograms = []
+    eegs = np.zeros((249, 75000))
+    filename = 'test_input.csv'
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+        reader.next()
+        c = 0
+        for row in reader:
+            hypnograms.append(np.array(hypnogram_to_list(row[75002])))
+            eegs[c, :] = row[2:75002]
+            c += 1
+    return hypnograms, eegs
+
+
 def get_labels(filename):
     labels = np.zeros(581)
     with open(filename, 'rb') as csvfile:
