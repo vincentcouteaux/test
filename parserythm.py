@@ -106,7 +106,7 @@ if __name__ == "__main__":
     #plt.plot(eegs[1, :])
     #plt.plot(eegs[2, :])
     #plt.plot(eegs[3, :])
-    for k in range(15):
+    for k in range(5):
         plt.figure()
         plt.plot(hypnograms[k])
         plt.title(labels[k])
