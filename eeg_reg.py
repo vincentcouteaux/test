@@ -2,22 +2,36 @@ import numpy as np
 import pywt
 import scipy as sp
 import scipy.signal
+import scipy.misc
 from parserythm import *
 
 FE = 250
 
 def wavelet(eeg, age):
-    coefs, freq = pywt.cwt(eeg, np.arange(1, 129), 'shan')
+    coefs, freq = pywt.cwt(eeg, np.arange(1, 5, 100), 'shan', sampling_period=1./FE)
+    coefs = sp.misc.imresize(np.log(np.abs(coefs)), (60, 150))
     plt.figure()
-    plt.imshow(np.flipud(np.log(np.abs(coefs))), aspect="auto")
-    plt.title('age = {}, max freq = {}'.format(age, freq[-1]))
+    plt.imshow(np.flipud(coefs), aspect="auto")
+    plt.title('age = {}, max freq = {}'.format(age, np.max(freq)))
 
-def stft(eeg, age):
-    plt.figure()
-    f, t, s = sp.signal.spectrogram(eeg, fs=250., nperseg=256)
-    s=np.flipud(s)
-    plt.imshow(np.log(s), aspect="auto", extent=[t[0], t[-1],f[0], f[-1]])
-    plt.title('age = {}'.format(age))
+def stft(eeg, f_max, f_min=-1):
+    n = 256
+    f, t, s = sp.signal.spectrogram(eeg, fs=250., nperseg=n)
+    #s=np.flipud(s)
+    #n = eegs.shape[1]/2
+    if f_min == -1:
+        min_bin = 0
+    else:
+        min_bin = int(float(f_min)/FE*n)
+    max_bin = int(float(f_max)/FE*n)
+    s=s[min_bin:max_bin, :]
+    return np.log(s)
+
+def stfts(eegs, f_max, f_min=-1):
+    out = []
+    for eeg in eegs:
+        out.append(stft(eeg, f_max, f_min))
+    return np.array(out)
 
 def fft(eeg, age):
     plt.figure()
@@ -50,6 +64,12 @@ def spectrums(eegs, f_max, f_min = -1, n=-1):
     max_bin = int(float(f_max)/FE*n)
     return s[:, min_bin:max_bin]
 
+def wavedecs(eegs):
+    out = []
+    for eeg in eegs:
+        out.append(np.concatenate(pywt.wavedec(eeg, 'db1')[:5]))
+    return np.array(out)
+
 def maxf (eegs):
     spec = spectrums(eegs, 10.)
     #print(np.argmax(spec, 1))
@@ -80,16 +100,12 @@ if __name__ == "__main__":
     eegs = get_eegs('train_input.csv')
     labels = get_labels('challenge_output_data_training_file_age_prediction_from_eeg_signals.csv')
     devices = get_device('train_input.csv')
-#    stft(eegs[0], labels[0])
-    #stft(eegs[1], labels[1])
-#    stft(eegs[2], labels[2])
-#    stft(eegs[np.argmax(labels)], np.max(labels))
-#    stft(eegs[np.argmin(labels)], np.min(labels))
-    #plt.hist(labels, 40)
-    #all_ages_stft(eegs, labels)
-    #wavelet(eegs[2], labels[2])
-    plt.scatter(labels[devices==0], above75(eegs[devices==0]))
-    plt.figure()
-    plt.scatter(labels[devices==1], above75(eegs[devices==1]))
+#    plt.figure()
+#    plt.scatter(labels[devices==1], above75(eegs[devices==1]))
+    spec = stfts(eegs[15:30], 40.)
+    print(spec.shape)
+    for s in spec:
+        plt.figure()
+        plt.imshow(s, aspect="auto")
     plt.show()
 

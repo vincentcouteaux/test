@@ -3,7 +3,7 @@ import mne
 import matplotlib.pyplot as plt
 from parserythm import *
 from mne.preprocessing import create_ecg_epochs, create_eog_epochs
-from mne.time_frequency import psd_welch
+from mne.time_frequency import psd_welch, tfr_morlet
 
 def get_psds(eegs):
     out=[]
@@ -33,15 +33,31 @@ def max_pools(eegs, max_freq, f_gap):
         out.append(max_pool(psd, 250, freqs, max_freq, f_gap))
     return np.array(out)
 
+def get_wavelet(eegs):
+    out=[]
+    ch_types = ['eeg']
+    ch_name = ['train0']
+    sfreq = 250
+    info = mne.create_info(ch_names=ch_name, sfreq=sfreq, ch_types=ch_types)
+    freqs = np.arange(2., 40., 2.)
+    ncycles = freqs/2
+    for eeg in eegs:
+        raw = mne.io.RawArray(eeg[None, :], info)
+        wv = tfr_morlet(raw, freqs, ncycles) #Doesn't work: needs epochs
+        wv.plot([0])
+        #out.append(np.log(psd[0][0,:]))
+    return out, freqs
+
 
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
     #psds, freqs = get_psds(eval_eegs)
-    pools = max_pools(eval_eegs, 40, 5)
-    for pool in pools[:15]:
-        plt.figure()
-        plt.plot(pool)
-    plt.show()
+    get_wavelet(train_eegs)
+    #pools = max_pools(eval_eegs, 40, 5)
+    #for pool in pools[:15]:
+    #    plt.figure()
+    #    plt.plot(pool)
+    #plt.show()
 
 
 
