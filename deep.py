@@ -64,8 +64,8 @@ def forward_batch(n, sess, eegs, hyps, ages):
     total = eegs.shape[0]
     feed = {spec: eegs[first_patient:first_patient+n], true_ages:ages[first_patient:first_patient+n], hyp_features:hyps[first_patient:first_patient+n]}
     first_patient = (first_patient+n)%total
-    dist, _ = sess.run((euc_distance, train_step), feed_dict=feed)
-    #print(dist)
+    agest, dist, _ = sess.run((ages_tensor, euc_distance, train_step), feed_dict=feed)
+    print(dist, agest)
 
 def eval1patient(sess, spec_, hyp):
     slices = np.array(slice_specgram(spec_, 60, 15))
