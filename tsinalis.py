@@ -17,13 +17,13 @@ def conv2d(x, W):
 def max_pool(x, n, m):
     return tf.nn.max_pool(x, ksize=[1, n, m, 1], strides=[1, n, m, 1], padding='SAME')
 
-eeg = tf.placeholder(tf.float32, shape=[None, 15000])
+eeg_ph = tf.placeholder(tf.float32, shape=[None, 15000])
 true_ages = tf.placeholder(tf.float32, shape=[None])
 
 W1 = weight_variable([200, 1, 1, 20], name="W1")
 b1 = bias_variable([20], name="b1")
 
-r_eeg = tf.reshape(eeg, [-1, 15000, 1, 1])
+r_eeg = tf.reshape(eeg_ph, [-1, 15000, 1, 1])
 
 h_conv1 = tf.nn.relu(conv2d(r_eeg, W1) + b1)
 h_pool1 = max_pool(h_conv1, 20, 1)
@@ -53,15 +53,18 @@ ages_tensor = tf.nn.relu(tf.matmul(h_fc1, W5) + b5)
 euc_distance = tf.reduce_mean(tf.square(ages_tensor - true_ages))
 train_step = tf.train.AdamOptimizer(1e-4).minimize(euc_distance)
 
-first_patient = 0
-
 def forward_batch(n, sess, eegs, ages):
-    global first_patient
     total = eegs.shape[0]
-    feed = {eegs_: eegs[first_patient:first_patient+n], true_ages:ages[first_patient:first_patient+n]}
-    first_patient = (first_patient+n)%total
+    r = np.random.permutation(total)
+    eegs = eegs[r]
+    ages = ages[r]
+    feed = {eeg_ph: eegs[:n], true_ages:ages[:n]}
     agest, dist, _ = sess.run((ages_tensor, euc_distance, train_step), feed_dict=feed)
-    #print(dist, agest)
+    print(agest)
+    print(ages[:n])
+    print(dist)
+    if np.isnan(agest).any():
+        print(agest)
 
 def slice_eeg(eeg, size, hop):
     out = []
@@ -71,9 +74,8 @@ def slice_eeg(eeg, size, hop):
 
 def eval1patient(sess, eeg):
     slices = np.array(slice_eeg(eeg, 15000, 5000))
-    ans = sess.run(ages_tensor, {eeg:slices})
+    ans = sess.run(ages_tensor, {eeg_ph:slices})
     return np.mean(ans), np.std(ans)
-    #print("CNN; score: {}".format(mape(ans, ages)))
 
 def eval_all(sess, eegs, ages):
     ages_c = np.zeros(ages.size)
@@ -82,23 +84,24 @@ def eval_all(sess, eegs, ages):
         ages_c[i], stds[i] = eval1patient(sess, s)
     print("CNN; score: {}, std: {}".format(mape(ages_c, ages), np.mean(stds)))
 
-def slice_and_stack(eegs, size, hop):
+def slice_and_stack(eegs, ages, size, hop):
 	out = []
-	for s in eegs:
+	labels = []
+	for i, s in enumerate(eegs):
 	    slices = slice_eeg(s, size, hop)
 	    out += slices
-	return np.array(out)
+	    for k in range(len(slices)):
+	    	labels.append(ages[i])
+	return np.array(out), np.array(labels)
 
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
-    t_slices = slice_and_stack(train_eegs, 15000, 5000)
-    ages = train_labels
+    t_slices, t_labels = slice_and_stack(train_eegs, train_labels, 15000, 5000)
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    print(first_patient)
     for k in range(10000):
         #forward_batch(50, sess, specs, train_feat, train_labels)
-        forward_batch(50, sess, t_slices, train_labels)
-        if k % 100 == 0:
+        forward_batch(50, sess, t_slices, t_labels)
+        if k % 1 == 0:
             #forward_eval(sess, eval_specs, eval_feat, eval_labels)
             eval_all(sess, eval_eegs, eval_labels)
