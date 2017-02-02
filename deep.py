@@ -43,29 +43,37 @@ h_pool3 = max_pool(h_conv3, 1, 2)
 
 h_flat3 = tf.reshape(h_pool3, [-1, 5], name="reshape2")
 #h_flat3 = tf.reshape(h_pool3, [-1, 35*5], name="reshape2")
-h_concat = tf.concat(1, [h_flat3, hyp_features])
+#h_concat = tf.concat(1, [h_flat3, hyp_features])
 
-W4 = weight_variable([5+5, 512], "W4")
-#W4 = weight_variable([35*5+5, 512], "W4")
+#W4 = weight_variable([5+5, 512], "W4")
+W4 = weight_variable([5, 512], "W4")
 b4 = bias_variable([512], "b4")
 
-h_fc1 = tf.nn.relu(tf.matmul(h_concat, W4) + b4)
+h_fc1 = tf.nn.relu(tf.matmul(h_flat3, W4) + b4)
+#h_fc1 = tf.nn.relu(tf.matmul(h_concat, W4) + b4)
 
 W5 = weight_variable([512, 1], "W5")
 b5 = bias_variable([1], "b5")
 ages_tensor = tf.nn.relu(tf.matmul(h_fc1, W5) + b5)
 
-euc_distance = tf.reduce_mean(tf.square(ages_tensor - true_ages))
+#euc_distance = tf.reduce_mean(tf.square(ages_tensor - true_ages))
+euc_distance = tf.reduce_mean(tf.abs((ages_tensor - true_ages)/true_ages))
 train_step = tf.train.AdamOptimizer(1e-4).minimize(euc_distance)
 
 first_patient = 0
 def forward_batch(n, sess, eegs, hyps, ages):
     global first_patient
     total = eegs.shape[0]
-    feed = {spec: eegs[first_patient:first_patient+n], true_ages:ages[first_patient:first_patient+n], hyp_features:hyps[first_patient:first_patient+n]}
-    first_patient = (first_patient+n)%total
+    r = np.random.permutation(total)
+    eegs = eegs[r]
+    hyps = hyps[r]
+    ages = ages[r]
+    #feed = {spec: eegs[first_patient:first_patient+n], true_ages:ages[first_patient:first_patient+n], hyp_features:hyps[first_patient:first_patient+n]}
+    feed = {spec: eegs[:n], true_ages:ages[:n], hyp_features:hyps[:n]}
+    #first_patient = (first_patient+n)%total
     agest, dist, _ = sess.run((ages_tensor, euc_distance, train_step), feed_dict=feed)
-    print(dist, agest)
+    if np.isnan(agest).any():
+        print(agest)
 
 def eval1patient(sess, spec_, hyp):
     slices = np.array(slice_specgram(spec_, 60, 15))
@@ -90,30 +98,32 @@ def slice_specgram(specgram, size, hop):
         out.append(specgram[:, i*hop:i*hop+size])
     return out
 
-def slice_and_stack(specgrams, hyp_feat, size, hop):
+def slice_and_stack(specgrams, hyp_feat, ages, size, hop):
     out = []
     hypf = []
+    labels = []
     for i, s in enumerate(specgrams):
         slices = slice_specgram(s, size, hop)
         out += slices
         for k in range(len(slices)):
             hypf.append(hyp_feat[i])
-    return np.array(out), np.array(hypf)
+            labels.append(ages[i])
+    return np.array(out), np.array(hypf), np.array(labels)
 
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
     specs = stfts(train_eegs, 40.)
     train_feat = get_features(train_hyp)
-    t_slices, t_feat = slice_and_stack(specs, train_feat, 60, 15)
+    t_slices, t_feat, t_ages = slice_and_stack(specs, train_feat, train_labels, 60, 1)
     eval_specs = stfts(eval_eegs, 40.)
     eval_feat = get_features(eval_hyp)
     ages = train_labels
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     print(first_patient)
-    for k in range(10000):
+    for k in range(100000):
         #forward_batch(50, sess, specs, train_feat, train_labels)
-        forward_batch(50, sess, t_slices, t_feat, train_labels)
+        forward_batch(50, sess, t_slices, t_feat, t_ages)
         if k % 100 == 0:
             #forward_eval(sess, eval_specs, eval_feat, eval_labels)
             eval_all(sess, eval_specs, eval_feat, eval_labels)
