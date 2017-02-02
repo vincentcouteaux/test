@@ -143,6 +143,12 @@ def feature_cycle(hyp):
 
 	return rem_cycles_duration, nrem_cycles_duration
 
+def get_feature_cycle(hyps):
+	out = []
+	for hyp in hyps:
+		rem_cycles_duration, nrem_cycles_duration = feature_cycle(hyp)
+		out.append(np.array(rem_cycles_duration + nrem_cycles_duration))
+	return np.array(out)
 
 if __name__ == "__main__":
 	hypnograms = get_hypnograms('train_input.csv')

@@ -17,9 +17,9 @@ test_hyp, test_eegs = test_base()
 def extract_features(hyp, devices, eegs):
     hyp = list_max_gliss(hyp, 2)
     features = get_features(hyp)
-    #pools = max_pools(eegs, 30, 5)
-    wave = wavedecs(eegs)
-    return np.c_[(features, wave)]
+    pools = max_pools(eegs, 30, 5)
+    #wave = wavedecs(eegs)
+    return np.c_[(features, pools)]
     #return np.c_[(features, devices, maxf(eegs), spectrums(eegs, 30., 10., 512)/(maxf(eegs)[:, None]))]
 
 train_features = extract_features(train_hyp, train_devices, train_eegs)
