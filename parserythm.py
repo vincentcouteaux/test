@@ -106,9 +106,18 @@ if __name__ == "__main__":
     #plt.plot(eegs[1, :])
     #plt.plot(eegs[2, :])
     #plt.plot(eegs[3, :])
-    for k in range(5):
+    for k in range(2):
         plt.figure()
-        plt.plot(hypnograms[k])
-        plt.title(labels[k])
+        plt.plot(hypnograms[k+15])
+        plt.title('hypnogram of a {} y.o'.format(labels[k+15]))
+        plt.xlabel('Time')
+        plt.ylabel('Sleep stage')
+    plt.figure()
+    plt.hist(labels, bins=int(np.max(labels)-np.min(labels)))
+    plt.title('histogram of ages (train base)')
+    plt.xlabel('age')
+    plt.ylabel('count')
+    print('mean ages = {}'.format(np.mean(labels)))
+    print('std ages = {}'.format(np.std(labels)))
     plt.show()
 

@@ -15,7 +15,7 @@ train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_de
 test_hyp, test_eegs = test_base()
 
 def extract_features(hyp, devices, eegs):
-    hyp = list_max_gliss(hyp, 2)
+    #hyp = list_max_gliss(hyp, 2)
     features = get_features(hyp)
     pools = max_pools(eegs, 30, 5)
     #wave = wavedecs(eegs)

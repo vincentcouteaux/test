@@ -97,6 +97,11 @@ def slice_and_stack(eegs, ages, size, hop):
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
     t_slices, t_labels = slice_and_stack(train_eegs, train_labels, 15000, 5000)
+    for k in range(10):
+        plt.figure()
+        plt.plot(t_slices[k, :])
+        plt.title(t_labels[k])
+    plt.show()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     for k in range(10000):

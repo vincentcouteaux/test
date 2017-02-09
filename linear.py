@@ -24,6 +24,12 @@ def get_rem_time(hypnograms):
         out.append(np.sum(hypnogram == 4))
     return np.array(out)
 
+def get_rem_proportion(hypnograms):
+    out = []
+    for hypnogram in hypnograms:
+        out.append(np.mean(hypnogram == 4))
+    return np.array(out)
+
 def number_of_wakening(hypnograms):
     out = []
     for hypnogram in hypnograms:
@@ -49,6 +55,12 @@ def total_sleep_time(hypnograms):
         out.append(len(hypnogram))
     return np.array(out)
 
+def total_non_awake(hypnograms):
+    out=[]
+    for hypnogram in hypnograms:
+        out.append(np.sum(hypnogram > 0))
+    return np.array(out)
+
 def number_of_deep_sleep(hypnograms):
     out = []
     for hypnogram in hypnograms:
@@ -64,7 +76,7 @@ def wavelet(eeg):
     plt.show()
 
 def get_features(hypnograms):
-    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), total_sleep_time(hypnograms))).T
+    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), get_rem_proportion(hypnograms), total_sleep_time(hypnograms), total_non_awake(hypnograms))).T
 
 def train_and_give_forecast(X, ages):
     #regr = sk.linear_model.LinearRegression()

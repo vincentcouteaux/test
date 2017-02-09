@@ -19,7 +19,7 @@ def max_pool(x, n, m):
 
 spec = tf.placeholder(tf.float32, shape=[None, 40, 60]) #40 frequency bins, 334 temp bins
 #spec = tf.placeholder(tf.float32, shape=[None, 40, 334]) #40 frequency bins, 334 temp bins
-hyp_features = tf.placeholder(tf.float32, shape=[None, 5]) # 5 is the number of hypnograms features
+hyp_features = tf.placeholder(tf.float32, shape=[None, 7]) # 5 is the number of hypnograms features
 true_ages = tf.placeholder(tf.float32, shape=[None])
 
 W1 = weight_variable([1, 13, 1, 5], name="W1")
@@ -43,14 +43,14 @@ h_pool3 = max_pool(h_conv3, 1, 2)
 
 h_flat3 = tf.reshape(h_pool3, [-1, 5], name="reshape2")
 #h_flat3 = tf.reshape(h_pool3, [-1, 35*5], name="reshape2")
-#h_concat = tf.concat(1, [h_flat3, hyp_features])
+h_concat = tf.concat(1, [h_flat3, hyp_features])
 
-#W4 = weight_variable([5+5, 512], "W4")
-W4 = weight_variable([5, 512], "W4")
+W4 = weight_variable([7+5, 512], "W4")
+#W4 = weight_variable([5, 512], "W4")
 b4 = bias_variable([512], "b4")
 
-h_fc1 = tf.nn.relu(tf.matmul(h_flat3, W4) + b4)
-#h_fc1 = tf.nn.relu(tf.matmul(h_concat, W4) + b4)
+#h_fc1 = tf.nn.relu(tf.matmul(h_flat3, W4) + b4)
+h_fc1 = tf.nn.relu(tf.matmul(h_concat, W4) + b4)
 
 W5 = weight_variable([512, 1], "W5")
 b5 = bias_variable([1], "b5")
