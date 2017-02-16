@@ -61,6 +61,13 @@ def total_non_awake(hypnograms):
         out.append(np.sum(hypnogram > 0))
     return np.array(out)
 
+def get_rem_latency(hypnograms):
+	out = []
+	for hypnogram in hypnograms:
+		lat = np.argmax(hypnogram == 4)
+		out.append(lat)
+	return out
+
 def number_of_deep_sleep(hypnograms):
     out = []
     for hypnogram in hypnograms:
@@ -76,7 +83,7 @@ def wavelet(eeg):
     plt.show()
 
 def get_features(hypnograms):
-    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), get_rem_proportion(hypnograms), total_sleep_time(hypnograms), total_non_awake(hypnograms))).T
+    return np.stack((get_deep_sleep_proportion(hypnograms), wake_after_sleep_onset(hypnograms), number_of_wakening(hypnograms), number_of_deep_sleep(hypnograms), get_rem_proportion(hypnograms), total_sleep_time(hypnograms), total_non_awake(hypnograms), get_rem_latency(hypnograms))).T
 
 def train_and_give_forecast(X, ages):
     #regr = sk.linear_model.LinearRegression()
@@ -103,18 +110,45 @@ if __name__ == "__main__":
     awake = get_awake_proportion(hypnograms)
     rem = get_rem_time(hypnograms)
     wakenings = number_of_wakening(hypnograms)
-    #plt.scatter(labels, deepsleep)
-    #plt.title('deep sleep proportion')
-    #plt.figure()
-    #plt.scatter(labels, wakenings)
-    #plt.title('wakenings time')
-    #plt.figure()
-    #plt.scatter(labels, wake_after_sleep_onset(hypnograms))
-    #plt.title('waso (min)')
-    #plt.figure()
-    #plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
-    #plt.title('deep sleep quality')
-    #plt.show()
+    latency = get_rem_latency(hypnograms)
+    tot = total_non_awake(hypnograms)
+    rem_prop = get_rem_proportion(hypnograms)
+    plt.figure()
+    plt.scatter(labels, deepsleep)
+    plt.title('Deep sleep proportion')
+    plt.xlabel('Age')
+    plt.ylabel('Deep slep proportion')
+    plt.figure()
+    plt.scatter(labels, wakenings)
+    plt.title('Number of awakenings')
+    plt.xlabel('Age')
+    plt.ylabel('Number of Awakenings')
+    plt.figure()
+    plt.scatter(labels, wake_after_sleep_onset(hypnograms))
+    plt.title('WASO (min)')
+    plt.xlabel('Age')
+    plt.ylabel('WASO (min)')
+    plt.figure()
+    plt.scatter(labels, number_of_deep_sleep(hypnograms)/deepsleep)
+    plt.title('Deep sleep quality')
+    plt.xlabel('Age')
+    plt.ylabel('Sleep quality')
+    plt.figure()
+    plt.scatter(labels, latency)
+    plt.title('REM latency')
+    plt.xlabel('Age')
+    plt.ylabel('REM latency')
+    plt.figure()
+    plt.scatter(labels, tot)
+    plt.title('Total sleep time')
+    plt.xlabel('Age')
+    plt.ylabel('Total sleep time')
+    plt.figure()
+    plt.scatter(labels, rem_prop)
+    plt.title('REM sleep proportion')
+    plt.xlabel('Age')
+    plt.ylabel('REM sleep proportion')
+    plt.show()
     #print(mape(train_and_give_forecast(get_features(hypnograms), labels), labels))
     regr = train(get_features(hypnograms), labels)
     hyp_test = get_hypnograms('test_input.csv')
