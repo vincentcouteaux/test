@@ -64,9 +64,20 @@ if __name__ == "__main__":
         # plt.title('electroencephalogram of a {} y.o'.format(train_labels[k+15]))
         # plt.xlabel('Time')
         # plt.ylabel('Voltage unit')
-        
+       
     plt.show()
-    #pools = max_pools(eval_eegs, 40, 5)
+    ch_types = ['eeg']
+    ch_name = ['train0']
+    sfreq = 250
+    info = mne.create_info(ch_names=ch_name, sfreq=sfreq, ch_types=ch_types)
+    eeg = train_eegs[15]
+    raw = mne.io.RawArray(eeg[None, :], info)
+    print(train_labels[15])
+    raw.plot(show=True)
+    eeg = train_eegs[16]
+    raw = mne.io.RawArray(eeg[None, :], info)
+    raw.plot(show=True)
+    print(train_labels[16])
     #for pool in pools[:15]:
     #    plt.figure()
     #    plt.plot(pool)

@@ -48,10 +48,11 @@ h_fc2 = tf.nn.relu(tf.matmul(h_fc1, W4) + b4)
 
 W5 = weight_variable([500, 1], "W5")
 b5 = bias_variable([1], "b5")
-ages_tensor = tf.nn.relu(tf.matmul(h_fc1, W5) + b5)
+ages_tensor = tf.nn.relu(tf.matmul(h_fc2, W5) + b5)
 
 euc_distance = tf.reduce_mean(tf.square(ages_tensor - true_ages))
-train_step = tf.train.AdamOptimizer(1e-4).minimize(euc_distance)
+#train_step = tf.train.AdamOptimizer(1e-4).minimize(euc_distance)
+train_step = tf.train.GradientDescentOptimizer(1e-4).minimize(euc_distance)
 
 def forward_batch(n, sess, eegs, ages):
     total = eegs.shape[0]
@@ -60,8 +61,8 @@ def forward_batch(n, sess, eegs, ages):
     ages = ages[r]
     feed = {eeg_ph: eegs[:n], true_ages:ages[:n]}
     agest, dist, _ = sess.run((ages_tensor, euc_distance, train_step), feed_dict=feed)
-    print(agest)
-    print(ages[:n])
+    #print(agest)
+    #print(ages[:n])
     print(dist)
     if np.isnan(agest).any():
         print(agest)
@@ -97,16 +98,17 @@ def slice_and_stack(eegs, ages, size, hop):
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
     t_slices, t_labels = slice_and_stack(train_eegs, train_labels, 15000, 5000)
-    for k in range(10):
-        plt.figure()
-        plt.plot(t_slices[k, :])
-        plt.title(t_labels[k])
+    if False:
+        for k in range(10):
+            plt.figure()
+            plt.plot(t_slices[k, :])
+            plt.title(t_labels[k])
     plt.show()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     for k in range(10000):
         #forward_batch(50, sess, specs, train_feat, train_labels)
         forward_batch(50, sess, t_slices, t_labels)
-        if k % 1 == 0:
+        if k % 100 == 0:
             #forward_eval(sess, eval_specs, eval_feat, eval_labels)
             eval_all(sess, eval_eegs, eval_labels)
