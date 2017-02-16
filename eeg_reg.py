@@ -4,6 +4,7 @@ import scipy as sp
 import scipy.signal
 import scipy.misc
 from parserythm import *
+from scipy.signal import medfilt
 
 FE = 250
 
@@ -39,6 +40,45 @@ def fft(eeg, age):
     spectrum = spectrum[:(spectrum.size/2)]
     plt.plot(spectrum)
     plt.title('age: {} y.o'.format(int(age)))
+
+def suppr_artifact(specs):
+    out = np.zeros(specs.shape)
+    for i, s in enumerate(specs):
+        out[i] = medfilt(s, (1, 13))
+    return out
+
+def norm_psd(eeg, f_max, f_min=-1):
+    if f_min == -1:
+        f_min = 0
+    spec = stft(eeg, f_max, f_min)
+    spec = medfilt(spec, (1, 13))
+    psd = np.mean(spec, 1)
+    minbin = (2. - f_min)*psd.size/(f_max - f_min)
+    maxbin = (30. - f_min)*psd.size/(f_max - f_min)
+    r = np.sum(psd[int(minbin):int(maxbin)])
+    psd += r
+    return psd
+
+def norm_max_pool(psd, fs, max_freq, f_gap):
+    out = np.zeros(int(max_freq/f_gap))
+    for k in range(int(max_freq/f_gap)):
+        beg = int(k*float(f_gap)/fs*psd.size*2)
+        end = int((k+1)*float(f_gap)/fs*psd.size*2)
+        out[k] = np.max(psd[beg:end])
+    return out
+
+def norm_max_pools(eegs, max_freq, f_gap):
+    psds = norms_psds(eegs, 50)
+    out = []
+    for psd in psds:
+        out.append(norm_max_pool(psd, 250, max_freq, f_gap))
+    return np.array(out)
+
+def norms_psds(eegs, f_max, f_min=-1):
+    out = []
+    for eeg in eegs:
+        out.append(norm_psd(eeg, f_max, f_min))
+    return np.array(out)
 
 def f_0(eeg):
     spectrum = np.log(np.abs(np.fft.fft(eeg)))
@@ -102,10 +142,19 @@ if __name__ == "__main__":
     devices = get_device('train_input.csv')
 #    plt.figure()
 #    plt.scatter(labels[devices==1], above75(eegs[devices==1]))
-    spec = stfts(eegs[15:30], 40.)
-    print(spec.shape)
-    for s in spec:
+    spec = stfts(eegs[15:20], 100.)
+    no_art = suppr_artifact(spec)
+    norm_psd(eegs[0], 40.)
+    for i, s in enumerate(spec):
         plt.figure()
-        plt.imshow(s, aspect="auto")
+        plt.imshow(np.flipud(s), aspect="auto", extent=[0, 5*60, 0, 100])
+        plt.xlabel("time (s)")
+        plt.ylabel("frequency (Hz)")
+        plt.title(str(int(labels[i])) + " y.o patient EEG spectrogram")
+        plt.figure()
+        plt.imshow(np.flipud(no_art[i]), aspect="auto", extent=[0, 5*60, 0, 100])
+        plt.xlabel("time (s)")
+        plt.ylabel("frequency (Hz)")
+        plt.title(str(int(labels[i])) + " y.o patient EEG filtered")
     plt.show()
 
