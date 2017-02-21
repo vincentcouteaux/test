@@ -52,8 +52,20 @@ def get_wavelet(eegs):
 if __name__ == "__main__":
     train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_devices, eval_labels = train_eval_base()
     #psds, freqs = get_psds(eval_eegs)
-    #get_psds(train_eegs)
-    #pools = max_pools(eval_eegs, 40, 5)
+    #get_wavelet(train_eegs)
+    for k in range(2):
+        eeg = train_eegs[k+15]
+        ch_types = ['eeg']
+        ch_name = ['train0']
+        sfreq = 250
+        info = mne.create_info(ch_names=ch_name, sfreq=sfreq, ch_types=ch_types)
+        raw = mne.io.RawArray(eeg[None, :], info)
+        raw.plot()
+        # plt.title('electroencephalogram of a {} y.o'.format(train_labels[k+15]))
+        # plt.xlabel('Time')
+        # plt.ylabel('Voltage unit')
+       
+    plt.show()
     ch_types = ['eeg']
     ch_name = ['train0']
     sfreq = 250
