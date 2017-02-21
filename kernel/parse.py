@@ -16,6 +16,18 @@ def retrieve_all_train():
             c += 1
     return images
 
+def normalize(images):
+    out = np.zeros(images.shape)
+    for i, im in enumerate(images):
+        out[i] = (im - np.min(im))/(np.max(im) - np.min(im))
+    return out
+
+def traindb():
+    images = retrieve_all_train()
+    images = np.reshape(images, (-1, 32, 32, 3), "F")
+    images = normalize(np.swapaxes(images, 1, 2))
+    return images
+
 def retrieve_labels():
     filename="Ytr.csv"
     labels = np.zeros(5000)
@@ -31,10 +43,10 @@ def retrieve_labels():
 if __name__ == "__main__":
     images = retrieve_all_train()
     images = np.reshape(images, (-1, 32, 32, 3), "F")
-    images = np.swapaxes(images, 1, 2)
+    images = normalize(np.swapaxes(images, 1, 2))
     labels = retrieve_labels()
-    for k in np.where(labels == 5)[0][:10]:
+    for k in np.where(labels == 1)[0][:10]:
         plt.figure()
-        plt.imshow(images[k])
+        plt.imshow(images[k], interpolation="nearest")
         plt.title(labels[k])
     plt.show()

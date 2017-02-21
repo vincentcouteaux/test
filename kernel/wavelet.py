@@ -64,6 +64,21 @@ def scat2D(Im, wt, sc, order, n_lin=np.abs):
         out = new_out
     return out
 
+def big_image(scat, w, h):
+    out = np.zeros((w, h))
+    w_sc = scat[0].shape[1]
+    h_sc = scat[0].shape[0]
+    wc = 0
+    hc = 0
+    for s in scat:
+        s = (s - np.min(s))/(np.max(s) - np.min(s))
+        out[hc:hc+h_sc, wc:wc+w_sc] = s
+        wc = wc + w_sc
+        if wc >= w:
+            wc = 0
+            hc = hc + h_sc
+    return out
+
 def concatScat(scat):
     flat_l = []
     for s in scat:
@@ -79,10 +94,11 @@ def scat_and_concat(images, wt, sc, order=3, n_lin=np.abs):
 
 if __name__ == "__main__":
     lena = cv2.imread("lena512.bmp")
-    wt, sc = daubechies(2)
+    wt, sc = daubechies(4)
     lena = lena[:, :, 0]
-    l = scat2D(lena, wt, sc, 3)
-    for i in l:
-        plt.figure()
-        plt.imshow(i)
+    l = scat2D(lena, wt, sc, 1, lambda x: x * (x > 0))
+    plt.imshow(big_image(l, 512, 512))
+    #for i in l:
+    #    plt.figure()
+    #    plt.imshow(i)
     plt.show()

@@ -20,7 +20,7 @@ train_hyp, train_eegs, train_devices, train_labels, eval_hyp, eval_eegs, eval_de
 def extract_features(hyp, devices, eegs):
     #hyp = list_max_gliss(hyp, 2)
     features = get_features(hyp)
-    pools = max_pools(eegs, 100, 10)
+    pools = max_pools(eegs, 50, 5)
     #pools = norms_psds(eegs, 40)
     return np.c_[(features, pools)]
     #return np.c_[(features, devices, maxf(eegs), spectrums(eegs, 30., 10., 512)/(maxf(eegs)[:, None]))]
