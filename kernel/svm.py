@@ -69,13 +69,26 @@ class Multiclass_svm:
             this.svms[-1].X = this.X
             this.svms[-1]._alpha = this.svms[-1]._train_svm(y[:, i])
 
+    def _dist_test_train(Xte, X):
+        out = np.zeros((Xte.shape[0], X.shape[0]))
+        for i, x in enumerate(Xte):
+            for j, y in enumerate(X):
+                out[i, j] = this._kernel(x, y)
+        return out
+
+    #def predict(this, X):
+    #    out = np.zeros((X.shape[0], this.n_classes))
+    #    for i, svm in enumerate(this.svms):
+    #        out[:, i] = svm.predict_smooth(X)
+    #    print(out)
+    #    return np.argmax(out, 1)
     def predict(this, X):
-        out = np.zeros((X.shape[0], this.n_classes))
+        n_classes = len(this.svms)
+        Alpha = np.zeros((this.X.shape[0], n_classes))
         for i, svm in enumerate(this.svms):
-            print("Predicting class {}".format(i))
-            out[:, i] = svm.predict_smooth(X)
-        #print(out)
-        return np.argmax(out, 1)
+            Alpha[:, i] = svm._alpha
+        L = this._dist_test_train(X, this.X)
+        return np.argmax(np.dot(L, Alpha), 1)
 
 
 def exp_euc(x, y, sigma2):
