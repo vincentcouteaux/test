@@ -14,11 +14,12 @@ if test == 0:
     phi, psis = morlet_bank(32, sigma2=0.7, js=[1, 2, 3])
     for k in range(n):
         im1 = np.sum(images[k], 2)/3
-        S1 = scattering(im1, phi, psis, order=2, sub_factor=8)
+        S1 = scattering(im1, phi, psis, order=2, sub_factor=1)
         plt.figure()
         plt.imshow(big_image(S1), interpolation="nearest")
+        S2 = scattering(im1, phi, psis, order=2, sub_factor=8)
         plt.figure()
-        plt.imshow(im1)
+        plt.imshow(big_image(S2), interpolation="nearest")
     plt.show()
 elif test == 1:
     images = testdb()

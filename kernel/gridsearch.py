@@ -47,8 +47,8 @@ def test_node(C, sigma):
     return np.mean(y_ == e_lab)
 
 bestScore = 0.
-for C in [1e-7, 1e-6, 5e-6]:
-    for sigma in [50000., 100000., 25000., 75000., 10000.]:
+for C in [5e-6, 7e-6]:
+    for sigma in [15000., 30000.]:
         if os.fork() == 0:
             score = test_node(C, sigma)
             print("C={}, sigma={}, score: {}".format(C, sigma, score))

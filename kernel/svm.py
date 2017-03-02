@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from cvxopt import solvers, matrix
 
 """ A SVM QP dual is :
@@ -87,7 +88,9 @@ class Multiclass_svm:
         Alpha = np.zeros((this.X.shape[0], n_classes))
         for i, svm in enumerate(this.svms):
             Alpha[:, i] = svm._alpha
+        print("computing L matrix... pid={}".format(os.getpid()))
         L = this._dist_test_train(X, this.X)
+        print("computing output matrix... pid={}".format(os.getpid()))
         return np.argmax(np.dot(L, Alpha), 1)
 
 
