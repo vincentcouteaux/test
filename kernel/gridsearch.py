@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import sys
 from parse import *
 from svm import *
 from wavelet import *
@@ -10,7 +12,7 @@ def to_grey(im):
 
 def labels2mat(labs):
     out = -np.ones((labs.size, int(np.max(np.unique(labs))+1)))
-    print(out.shape)
+    #print(out.shape)
     for i, l in enumerate(labs):
         out[i, int(l)] = 1
     return out
@@ -24,10 +26,11 @@ def csvread(filename):
     return np.array(out)
 
 
-wt, sc = daubechies(2)
+#wt, sc = daubechies(2)
 #images = traindb()
 #images = to_grey(images)
 #images = scat_and_concat(images, wt, sc, 3, lambda x: x * (x > 0))
+print("#reading images...")
 images = csvread("train_scat_morlet_m2.csv")
 train_size = 4000
 t_im = images[:train_size]
@@ -36,18 +39,24 @@ labels = retrieve_labels()
 t_lab = labels[:train_size]
 e_lab = labels[train_size:]
 
-bestScore = 0.
-for C in [0.0001, 0.001, 0.01]:
-    for sigma in [500., 1000., 5000., 10000., 15000., 50000.]:
-        regr = Multiclass_svm(C, lambda x, y : exp_euc(x, y, sigma))
-        regr.fit(t_im, labels2mat(t_lab))
-        y_ = regr.predict(e_im)
-        score = np.mean(y_ == e_lab)
-        print("C={}, sigma={}, score: {}".format(C, sigma, np.mean(y_ == e_lab)))
-        if score > bestScore:
-            bestC = C
-            bestSigma = sigma
-            bestScore = score
+def test_node(C, sigma):
+    regr = Multiclass_svm(C, lambda x, y : exp_euc(x, y, sigma))
+    print("Computing Gram matrix...", os.getpid())
+    regr.fit(t_im, labels2mat(t_lab))
+    y_ = regr.predict(e_im)
+    return np.mean(y_ == e_lab)
 
-print("BEST !!! C={}, sigma={}, score: {}".format(bestC, bestSigma, bestScore))
+bestScore = 0.
+for C in [1e-7, 1e-6, 5e-6]:
+    for sigma in [50000., 100000., 25000., 75000., 10000.]:
+        if os.fork() == 0:
+            score = test_node(C, sigma)
+            print("C={}, sigma={}, score: {}".format(C, sigma, score))
+            if score > bestScore:
+                bestC = C
+                bestSigma = sigma
+                bestScore = score
+            sys.exit(0)
+
+#print("BEST !!! C={}, sigma={}, score: {}".format(bestC, bestSigma, bestScore))
 

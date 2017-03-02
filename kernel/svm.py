@@ -72,8 +72,9 @@ class Multiclass_svm:
     def predict(this, X):
         out = np.zeros((X.shape[0], this.n_classes))
         for i, svm in enumerate(this.svms):
+            print("Predicting class {}".format(i))
             out[:, i] = svm.predict_smooth(X)
-        print(out)
+        #print(out)
         return np.argmax(out, 1)
 
 
