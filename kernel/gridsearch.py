@@ -31,7 +31,7 @@ def csvread(filename):
 #images = to_grey(images)
 #images = scat_and_concat(images, wt, sc, 3, lambda x: x * (x > 0))
 print("#reading images...")
-images = csvread("train_scat_morlet_m2.csv")
+images = csvread("train_scat_m2_fredecOPP.csv")
 train_size = 4000
 t_im = images[:train_size]
 e_im = images[train_size:]
@@ -47,16 +47,19 @@ def test_node(C, sigma):
     return np.mean(y_ == e_lab)
 
 bestScore = 0.
-for C in [5e-6, 7e-6]:
-    for sigma in [15000., 30000.]:
+f = open("resultsOPP2.txt", "w")
+for C in [3e-5, 1e-4, 7e-5]:
+    for sigma in [15000., 30000., 50000., 100000., 5000., 10000.]:
         if os.fork() == 0:
             score = test_node(C, sigma)
-            print("C={}, sigma={}, score: {}".format(C, sigma, score))
+            print("\n FINISHED!! C={}, sigma={}, score: {} -- pid={}\n\n".format(C, sigma, score, os.getpid()))
+            f.write("C={}, sigma={}, score: {} -- pid={}\n".format(C, sigma, score, os.getpid()))
             if score > bestScore:
                 bestC = C
                 bestSigma = sigma
                 bestScore = score
             sys.exit(0)
+f.close()
 
 #print("BEST !!! C={}, sigma={}, score: {}".format(bestC, bestSigma, bestScore))
 
