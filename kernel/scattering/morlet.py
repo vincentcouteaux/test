@@ -39,11 +39,13 @@ def morlet_bank(N, sigma2 = 0.85**2, n_angles=6, js=[1, 2, 3], ksi=3*np.pi/4):
     phi = gaussian2d(N, min(js), sigma2)
     psis = np.zeros((n_angles*len(js), N, N), dtype=complex)
     c = 0
+    freqs = np.zeros(psis.shape[0])
     for j in js:
         for theta in np.arange(n_angles)*np.pi/n_angles:
             psis[c] = morlet2d(j, theta, N, ksi, sigma2)
+            freqs[c] = j
             c += 1
-    return phi, psis
+    return phi, psis, freqs
 
 def convfft2d(i1, i2):
     return np.fft.ifftshift(np.fft.ifft2(np.fft.fft2(i1)*np.fft.fft2(i2)))
@@ -60,6 +62,26 @@ def scattering(image, phi, psis, order=1, sub_factor=8):
                 scatm.append(np.abs(convfft2d(o, psi)))
                 #plt.imshow(scatm[-1])
                 #plt.show()
+        out = scatm
+    for i, o in enumerate(out):
+        out[i] = np.abs(convfft2d(o, phi))
+        out[i] = subsamp(out[i], sub_factor)
+    return out
+
+def scattering_fr_decr(image, phi, psis, js, order=1, sub_factor=8):
+    out = [image]
+    freqs = [100]
+    for m in range(order):
+        scatm = []
+        freqm = []
+        for j, o in enumerate(out):
+            for i, psi in enumerate(psis):
+                if js[i] <= freqs[j]:
+                    scatm.append(np.abs(convfft2d(o, psi)))
+                    freqm.append(js[i])
+                    #plt.imshow(scatm[-1])
+                    #plt.show()
+        freqs = freqm
         out = scatm
     for i, o in enumerate(out):
         out[i] = np.abs(convfft2d(o, phi))

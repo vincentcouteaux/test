@@ -35,16 +35,16 @@ if __name__ == "__main__":
 #images = traindb()
 #images = to_grey(images)
 #images = scat_and_concat(images, wt, sc, 4, lambda x: x * (x > 0))
-    t_im = csvread("train_scat_morlet_m2.csv")
-    e_im = csvread("test_scat_morlet_m2.csv")
+    t_im = csvread("train_scat_m2_fredecOPP.csv")
+    e_im = csvread("test_scat_m2_fredecOPP.csv")
     labels = retrieve_labels()
     t_lab = labels
 
-    C = 5e-6
-    sigma=25000
+    C = 1e-5
+    sigma=30000
     regr = Multiclass_svm(C, lambda x, y : exp_euc(x, y, sigma))
     regr.fit(t_im, labels2mat(t_lab))
     y_ = regr.predict(e_im)
-    test_to_csv(y_, 'Yte_morlet_m2_2')
+    test_to_csv(y_, 'Yte_m2_fredecOPP')
 
 
