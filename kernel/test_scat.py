@@ -29,5 +29,5 @@ elif test == 1:
     print("computing wavelets...")
     phi, psis, js = morlet_bank(32, sigma2 = 0.7, js=[1, 2, 3, 4])
     print("scattering...")
-    s_coefs = scatter_color_images(images, phi, psis, order=2, sub_factor=16, js=js)
-    np.savetxt("test_scat_m2_fredecOPP.csv", s_coefs, delimiter=",")
+    s_coefs = scatter_color_images(images, phi, psis, orders=[1,2], sub_factor=16, js=js)
+    np.savetxt("test_scat_m12_fredecOPP.csv", s_coefs, delimiter=",")

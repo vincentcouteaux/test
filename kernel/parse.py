@@ -44,11 +44,13 @@ def retrieve_first_train(n):
     images = normalize(np.swapaxes(images, 1, 2))
     return images
 
-def normalize(images):
-    out = np.zeros(images.shape)
-    for i, im in enumerate(images):
-        out[i] = (im - np.min(im))/(np.max(im) - np.min(im))
-    return out
+#def normalize(images):
+#    out = np.zeros(images.shape)
+#    for i, im in enumerate(images):
+#        out[i] = (im - np.min(im))/(np.max(im) - np.min(im))
+#    return out
+def normalize(im):
+    return (im - np.min(im))/((np.max(im) - np.min(im)))
 
 def traindb():
     images = retrieve_all_train()
@@ -75,12 +77,8 @@ def retrieve_labels():
     return labels
 
 if __name__ == "__main__":
-    images = retrieve_all_train()
-    images = np.reshape(images, (-1, 32, 32, 3), "F")
-    images = normalize(np.swapaxes(images, 1, 2))
-    labels = retrieve_labels()
-    for k in np.where(labels == 1)[0][:10]:
+    images = retrieve_first_train(5)
+    for im in images:
         plt.figure()
-        plt.imshow(images[k], interpolation="nearest")
-        plt.title(labels[k])
+        plt.imshow(im, interpolation="nearest")
     plt.show()

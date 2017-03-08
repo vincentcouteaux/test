@@ -79,8 +79,6 @@ def scattering_fr_decr(image, phi, psis, js, order=1, sub_factor=8):
                 if js[i] <= freqs[j]:
                     scatm.append(np.abs(convfft2d(o, psi)))
                     freqm.append(js[i])
-                    #plt.imshow(scatm[-1])
-                    #plt.show()
         freqs = freqm
         out = scatm
     for i, o in enumerate(out):
