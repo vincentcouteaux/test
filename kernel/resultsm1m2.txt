@@ -1,0 +1,15 @@
+C=1e-05, sigma=30000.0, score: 0.653 -- pid=16941
+C=5e-06, sigma=15000.0, score: 0.634 -- pid=16955
+C=1e-06, sigma=50000.0, score: 0.625 -- pid=16949
+C=1e-05, sigma=15000.0, score: 0.631 -- pid=16939
+C=1e-05, sigma=50000.0, score: 0.643 -- pid=16942
+C=5e-06, sigma=50000.0, score: 0.643 -- pid=16957
+C=5e-06, sigma=30000.0, score: 0.638 -- pid=16956
+C=1e-05, sigma=100000.0, score: 0.632 -- pid=16943
+C=5e-06, sigma=100000.0, score: 0.64 -- pid=16963
+C=1e-06, sigma=100000.0, score: 0.615 -- pid=16950
+C=1e-06, sigma=150000.0, score: 0.627 -- pid=16953
+C=5e-06, sigma=150000.0, score: 0.633 -- pid=16972
+C=1e-05, sigma=150000.0, score: 0.621 -- pid=16944
+C=1e-06, sigma=15000.0, score: 0.634 -- pid=16945
+C=1e-06, sigma=30000.0, score: 0.633 -- pid=16948

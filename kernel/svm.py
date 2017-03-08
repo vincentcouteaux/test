@@ -83,6 +83,13 @@ class Multiclass_svm:
     #        out[:, i] = svm.predict_smooth(X)
     #    print(out)
     #    return np.argmax(out, 1)
+    def predict_train(this):
+        n_classes = len(this.svms)
+        Alpha = np.zeros((this.X.shape[0], n_classes))
+        for i, svm in enumerate(this.svms):
+            Alpha[:, i] = svm._alpha[:, 0]
+        return np.argmax(np.dot(this.K, Alpha), 1) 
+
     def predict(this, X):
         n_classes = len(this.svms)
         Alpha = np.zeros((this.X.shape[0], n_classes))
