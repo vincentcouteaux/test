@@ -16,6 +16,17 @@ def retrieve_all_train():
             c += 1
     return images
 
+def retrieve_all_test():
+    filename="Xte.csv"
+    images = np.zeros((2000, 3072))
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile)
+        c = 0
+        for row in reader:
+            images[c, :] = row[:3072]
+            c += 1
+    return images
+
 def normalize(images):
     out = np.zeros(images.shape)
     for i, im in enumerate(images):
@@ -24,6 +35,12 @@ def normalize(images):
 
 def traindb():
     images = retrieve_all_train()
+    images = np.reshape(images, (-1, 32, 32, 3), "F")
+    images = normalize(np.swapaxes(images, 1, 2))
+    return images
+
+def testdb():
+    images = retrieve_all_test()
     images = np.reshape(images, (-1, 32, 32, 3), "F")
     images = normalize(np.swapaxes(images, 1, 2))
     return images
@@ -39,6 +56,14 @@ def retrieve_labels():
             labels[c] = row[1]
             c += 1
     return labels
+
+def csv_read(filename):
+    out = []
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            out.append(row)
+    return np.double(np.array(out))
 
 if __name__ == "__main__":
     images = retrieve_all_train()
