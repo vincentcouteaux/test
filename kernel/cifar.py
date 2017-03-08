@@ -22,40 +22,29 @@ def test_to_csv(forecast, filename):
         for i in range(forecast.size):
             spamwriter.writerow([i+1, forecast[i]])
 
-wt, sc = daubechies(2)
-images = traindb()
-images = to_grey(images)
-images = scat_and_concat(images, wt, sc, 3, lambda x: x * (x > 0))
-train_size = 4000
-#t_im = images[:train_size]
-#e_im = images[train_size:]
-t_im = images
-e_im = testdb()
-e_im = to_grey(e_im)
-e_im = scat_and_concat(e_im, wt, sc, 3, lambda x: x * (x > 0))
-labels = retrieve_labels()
-#t_lab = labels[:train_size]
-#e_lab = labels[train_size:]
-t_lab = labels
+def csvread(filename):
+    out=[]
+    with open(filename, 'rb') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            out.append(np.double(row))
+    return np.array(out)
 
-bestScore = 0.
-#for C in [0.001, 0.1, 1., 10., 50., 1000]:
-C = 0.001
-    #for sigma in [0.001, 0.1, 10., 100., 10000., 100000.]:
-sigma = 10000
-regr = Multiclass_svm(C, lambda x, y : exp_euc(x, y, sigma))
-regr.fit(t_im, labels2mat(t_lab))
-y_ = regr.predict(e_im)
+if __name__ == "__main__":
+    wt, sc = daubechies(2)
+#images = traindb()
+#images = to_grey(images)
+#images = scat_and_concat(images, wt, sc, 4, lambda x: x * (x > 0))
+    t_im = csvread("train_scat_m12_fredecOPP.csv")
+    e_im = csvread("test_scat_m12_fredecOPP.csv")
+    labels = retrieve_labels()
+    t_lab = labels
 
+    C = 1e-5
+    sigma=30000
+    regr = Multiclass_svm(C, lambda x, y : exp_euc(x, y, sigma))
+    regr.fit(t_im, labels2mat(t_lab))
+    y_ = regr.predict(e_im)
+    test_to_csv(y_, 'Yte_m12_fredecOPP')
 
-test_to_csv(y_, 'svm_scatter_bizarre.csv')
-
-#score = np.mean(y_ == e_lab)
-#print("C={}, sigma={}, score: {}".format(C, sigma, np.mean(y_ == e_lab)))
-#if score > bestScore:
-    # bestC = C
-    # bestSigma = sigma
-    # bestScore = score
-
-# print("BEST !!! C={}, sigma={}, score: {}".format(bestC, bestSigma, bestScore))
 

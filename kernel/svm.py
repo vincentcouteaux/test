@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from cvxopt import solvers, matrix
 
 """ A SVM QP dual is :
@@ -69,12 +70,35 @@ class Multiclass_svm:
             this.svms[-1].X = this.X
             this.svms[-1]._alpha = this.svms[-1]._train_svm(y[:, i])
 
-    def predict(this, X):
-        out = np.zeros((X.shape[0], this.n_classes))
+    def _dist_test_train(this, Xte, X):
+        out = np.zeros((Xte.shape[0], X.shape[0]))
+        for i, x in enumerate(Xte):
+            for j, y in enumerate(X):
+                out[i, j] = this._kernel(x, y)
+        return out
+
+    #def predict(this, X):
+    #    out = np.zeros((X.shape[0], this.n_classes))
+    #    for i, svm in enumerate(this.svms):
+    #        out[:, i] = svm.predict_smooth(X)
+    #    print(out)
+    #    return np.argmax(out, 1)
+    def predict_train(this):
+        n_classes = len(this.svms)
+        Alpha = np.zeros((this.X.shape[0], n_classes))
         for i, svm in enumerate(this.svms):
-            out[:, i] = svm.predict_smooth(X)
-        print(out)
-        return np.argmax(out, 1)
+            Alpha[:, i] = svm._alpha[:, 0]
+        return np.argmax(np.dot(this.K, Alpha), 1) 
+
+    def predict(this, X):
+        n_classes = len(this.svms)
+        Alpha = np.zeros((this.X.shape[0], n_classes))
+        for i, svm in enumerate(this.svms):
+            Alpha[:, i] = svm._alpha[:, 0]
+        print("computing L matrix... pid={}".format(os.getpid()))
+        L = this._dist_test_train(X, this.X)
+        print("computing output matrix... pid={}".format(os.getpid()))
+        return np.argmax(np.dot(L, Alpha), 1)
 
 
 def exp_euc(x, y, sigma2):
@@ -92,12 +116,13 @@ if __name__ == "__main__":
     r = np.random.permutation(500)
     X = X[r]
     y = y[r]
+    y = np.stack((y, -y)).T
     Xtrain, ytrain, Xtest, ytest = X[:400], y[:400], X[400:], y[400:]
-    classif = Svm(1., lambda x, y: exp_euc(x, y, 16.))
+    classif = Multiclass_svm(1., lambda x, y: exp_euc(x, y, 16.))
     classif.fit(Xtrain, ytrain)
     fc = classif.predict(Xtest)
     print(fc)
-    print(ytest)
-    print("accuracy : {}".format(np.mean(fc == ytest)))
+    print(np.argmax(ytest, 1))
+    print("accuracy : {}".format(np.mean(fc == np.argmax(ytest, 1))))
 
 
