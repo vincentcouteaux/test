@@ -40,7 +40,8 @@ def retrieve_first_train(n):
             if c >= n:
                 break
     images = np.reshape(images, (-1, 32, 32, 3), "F")
-    images = normalize(np.swapaxes(images, 1, 2))
+    images = np.swapaxes(images, 1, 2)
+    #images = normalize(np.swapaxes(images, 1, 2))
     return images
 
 def normalize(im):
@@ -82,5 +83,8 @@ if __name__ == "__main__":
     images = retrieve_first_train(5)
     for im in images:
         plt.figure()
+        plt.imshow(im, interpolation="nearest")
+        plt.figure()
+        im = normalize(im)
         plt.imshow(im, interpolation="nearest")
     plt.show()
