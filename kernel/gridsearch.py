@@ -32,10 +32,10 @@ def csvread(filename):
 #images = scat_and_concat(images, wt, sc, 3, lambda x: x * (x > 0))
 print("#reading images...")
 #images = csvread("train_m12_OPP_norm.csv")
-images = csvread("train_scat_m12_fredecOPP.csv")
-mean = np.mean(images, 0)
-std = np.std(images, 0)
-images = (images - mean)/std
+images = csvread("train_m12_hog.csv")
+#mean = np.mean(images, 0)
+#std = np.std(images, 0)
+#images = (images - mean)/std
 train_size = 4000
 t_im = images[:train_size]
 e_im = images[train_size:]
@@ -52,12 +52,12 @@ def test_node(C, sigma):
     return np.mean(y_ == e_lab), np.mean(regr.predict_train() == t_lab)
 
 bestScore = 0.
-f = open("resultsnorm2.txt", "w")
+f = open("resultshog.txt", "w")
 #tup = ((1e-6, 110000), (1e-6, 120000), (1e-6, 135000), (1e-6, 150000), (1e-6, 175000),
 #        (7e-7, 110000), (7e-7, 120000), (7e-7, 135000), (7e-7, 150000), (7e-7, 175000),
 #        (1e-5, 12000), (1e-5, 10000), (5e-5, 8000), (5e-5, 1000), (1e-4, 10000))
-for C in [1e-5, 1e-6, 5e-6, 1e-4]:
-    for sigma in [15000., 30000., 50000., 100000.,1000., 75000.]:
+for C in [1e-5, 1e-6, 5e-6, 3e-5]:
+    for sigma in [15000., 30000., 50000., 100000.,10000., 40000.]:
 #for C, sigma in tup:
         if os.fork() == 0:
             score, trainscore = test_node(C, sigma)
